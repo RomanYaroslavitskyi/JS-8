@@ -39,7 +39,7 @@ player
         break;
     }
   });
-console.log(setCurrentTime);
+
 // player.on('timeupdate', throttle(setCurrentTimeVideo, 1000));
 
 console.log(player);
