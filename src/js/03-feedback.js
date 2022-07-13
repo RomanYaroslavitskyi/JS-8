@@ -1,43 +1,48 @@
-import throttle from 'lodash.throttle';
+const throttle = require('lodash.throttle');
+//Сделал импорт из Storage
+import Storage from './storage';
+//сделал переменные
+const form = document.querySelector('.feedback-form');
 
-const STORAGE_KEY = 'feedback-form-state ';
-const refs = {
-  form: document.querySelector('.feedback-form '),
-  textarea: document.querySelector('.feedback-form textarea'),
-  email: document.querySelector('.email'),
-};
+// Сделал ключ для локального хранилища
+const STORAGE_KEY = 'feedback-form-state';
 
-let formData = {};
-refs.form.addEventListener('submit', onFormSubmit);
-// refs.textarea.addEventListener('input', throttle(onTextareaInput, 500));
+// Вызов функции хранилища
+getTextLocalStorage();
 
-refs.form.addEventListener('change', throttle(onSaveLocalStorage, 500));
+//Повесил слушатилей на форму
+form.addEventListener('change', throttle(textSave, 500));
+form.addEventListener('submit', getTextFromForm);
 
-populateTextarea();
+//Беру текст  из формы
+function getTextFromForm(e) {
+  e.preventDefault();
 
-function onFormSubmit(evt) {
-  evt.preventDefault();
-  const saveMessage = localStorage.getItem(STORAGE_KEY);
-  const parseEl = JSON.parse(saveMessage);
-  console.log('email: ', parseEl.email);
-  console.log('message: ', parseEl.message);
-  evt.currentTarget.reset();
-  localStorage.removeItem(STORAGE_KEY);
+  const formData = new FormData(form);
+  formData.forEach((name, value) => console.log(`${value} : ${name}`));
+
+  form.reset();
+
+  Storage.remove(STORAGE_KEY);
 }
 
-function onSaveLocalStorage(e) {
-  formData[e.target.name] = e.target.value;
-  console.log(formData);
+//запюисываю текст в локальное хранилище
+function textSave(e) {
+  const { name, value } = e.target;
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  let saveData = Storage.load(STORAGE_KEY) ?? {};
+  saveData[name] = value;
+
+  Storage.save(STORAGE_KEY, saveData);
 }
 
-function populateTextarea(evt) {
-  const saveMessage = localStorage.getItem(STORAGE_KEY);
-  const parseEl = JSON.parse(saveMessage);
+//Получаю значение из хранилища
+function getTextLocalStorage() {
+  let saveData = Storage.load(STORAGE_KEY);
 
-  if (saveMessage) {
-    refs.textarea.value = parseEl.message;
-    refs.email.value = parseEl.email;
-  }
+  console.log(saveData);
+  if (!saveData) return;
+  Object.entries(saveData).forEach(
+    ([name, value]) => (form.elements[name].value = value)
+  );
 }
