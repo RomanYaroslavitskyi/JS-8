@@ -11,7 +11,7 @@ const STORAGE_KEY = 'feedback-form-state';
 getTextLocalStorage();
 
 //Повесил слушатилей на форму
-form.addEventListener('change', throttle(textSave, 500));
+form.addEventListener('input', throttle(textSave, 500));
 form.addEventListener('submit', getTextFromForm);
 
 //Беру текст  из формы
